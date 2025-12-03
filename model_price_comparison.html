@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI模型价格比较工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .controls {
+            padding: 30px 40px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .control-item label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="number"] {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .models-section {
+            padding: 30px 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: #2d3748;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .models-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .models-table th {
+            background: #f1f5f9;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .models-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .models-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .model-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .model-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        .results-section {
+            padding: 30px 40px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-card h3 {
+            font-size: 1.3rem;
+            color: #4f46e5;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-card h3 i {
+            font-size: 1.1rem;
+        }
+
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .price-unit {
+            font-size: 1rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .model-details {
+            margin-top: 15px;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .model-details div {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .rank-1 { background: #fef3c7; color: #92400e; }
+        .rank-2 { background: #e0e7ff; color: #3730a3; }
+        .rank-3 { background: #fce7f3; color: #831843; }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #718096;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 15px;
+            }
+
+            header, .controls, .models-section, .results-section {
+                padding: 20px;
+            }
+
+            .control-group {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .control-item {
+                width: 100%;
+            }
+
+            .models-table {
+                display: block;
+                overflow-x: auto;
+                font-size: 0.9rem;
+            }
+
+            .models-table th,
+            .models-table td {
+                padding: 12px 8px;
+            }
+
+            .model-input {
+                font-size: 0.85rem;
+                padding: 8px 10px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-robot"></i> AI模型价格比较工具</h1>
+            <p>比较不同AI模型的定价，自动统一转换为人民币每百万tokens进行比较，每个模型可独立选择币种和tokens单位</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="inputTokens"><i class="fas fa-keyboard"></i> 输入Tokens数量</label>
+                    <input type="number" id="inputTokens" value="1" min="0.1" step="0.1">
+                </div>
+
+                <div class="control-item">
+                    <label for="outputTokens"><i class="fas fa-reply"></i> 输出Tokens数量</label>
+                    <input type="number" id="outputTokens" value="1" min="0.1" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <div class="models-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> 模型配置</h2>
+                <button class="btn btn-primary" id="addModelBtn">
+                    <i class="fas fa-plus"></i> 添加模型
+                </button>
+            </div>
+
+            <table class="models-table">
+                <thead>
+                    <tr>
+                        <th width="20%">模型名称</th>
+                        <th width="15%">币种</th>
+                        <th width="15%">单位</th>
+                        <th width="15%">输入价格 (每单位)</th>
+                        <th width="15%">输出价格 (每单位)</th>
+                        <th width="15%">总价格</th>
+                        <th width="5%">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="modelsTableBody">
+                    <!-- 模型行将通过JavaScript动态添加 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="results-section">
+            <h2><i class="fas fa-chart-bar"></i> 价格比较结果</h2>
+            <div class="results-grid" id="resultsGrid">
+                <!-- 结果卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2024 AI模型价格比较工具 | 数据仅供参考，实际价格请以官方文档为准 | 汇率：USD=7.2, EUR=7.8, GBP=9.1, JPY=0.045</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;">
+                <i class="fas fa-info-circle"></i> 提示：所有价格自动统一转换为人民币每百万tokens进行比较，每个模型可独立选择币种和单位
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 示例模型数据
+        const sampleModels = [
+            { name: "GPT-4", currency: "USD", unit: "million", inputPrice: 30, outputPrice: 60 },
+            { name: "Claude 3 Opus", currency: "USD", unit: "million", inputPrice: 75, outputPrice: 375 },
+            { name: "Gemini Pro", currency: "USD", unit: "million", inputPrice: 0.5, outputPrice: 1.5 }
+        ];
+
+        // 币种符号映射
+        const currencySymbols = {
+            'USD': '$',
+            'CNY': '¥',
+            'EUR': '€',
+            'GBP': '£',
+            'JPY': '¥'
+        };
+
+        // 单位映射
+        const unitLabels = {
+            'million': '百万 tokens',
+            'thousand': '千 tokens'
+        };
+
+        // 汇率数据（示例汇率，实际使用时可以更新）
+        const exchangeRates = {
+            'USD': 7.2,    // 1美元 = 7.2人民币
+            'CNY': 1,      // 1人民币 = 1人民币
+            'EUR': 7.8,    // 1欧元 = 7.8人民币
+            'GBP': 9.1,    // 1英镑 = 9.1人民币
+            'JPY': 0.045   // 1日元 = 0.045人民币
+        };
+
+        // 将价格转换为人民币每百万tokens
+        function convertToCNYPerMillion(price, currency, unit) {
+            // 1. 将价格转换为人民币
+            let priceInCNY = price * exchangeRates[currency];
+
+            // 2. 将单位转换为百万tokens
+            if (unit === 'thousand') {
+                // 千tokens -> 百万tokens: 除以1000
+                priceInCNY = priceInCNY * 1000; // 注意：每千tokens的价格，转换为每百万tokens需要乘以1000
+            }
+            // 如果已经是百万tokens，不需要转换
+
+            return priceInCNY;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeModels();
+            updateAllCalculations();
+            setupEventListeners();
+        });
+
+        // 初始化示例模型
+        function initializeModels() {
+            const tableBody = document.getElementById('modelsTableBody');
+            tableBody.innerHTML = '';
+
+            sampleModels.forEach((model, index) => {
+                addModelRow(model.name, model.currency, model.unit, model.inputPrice, model.outputPrice);
+            });
+        }
+
+        // 添加模型行
+        function addModelRow(name = '', currency = 'USD', unit = 'million', inputPrice = 0, outputPrice = 0) {
+            const tableBody = document.getElementById('modelsTableBody');
+            const rowId = 'model-' + Date.now();
+
+            const row = document.createElement('tr');
+            row.id = rowId;
+            row.innerHTML = `
+                <td>
+                    <input type="text" class="model-input model-name" value="${name}"
+                           placeholder="例如: GPT-4" data-row="${rowId}">
+                </td>
+                <td>
+                    <select class="model-input model-currency" data-row="${rowId}">
+                        <option value="USD" ${currency === 'USD' ? 'selected' : ''}>美元 (USD)</option>
+                        <option value="CNY" ${currency === 'CNY' ? 'selected' : ''}>人民币 (CNY)</option>
+                        <option value="EUR" ${currency === 'EUR' ? 'selected' : ''}>欧元 (EUR)</option>
+                        <option value="GBP" ${currency === 'GBP' ? 'selected' : ''}>英镑 (GBP)</option>
+                        <option value="JPY" ${currency === 'JPY' ? 'selected' : ''}>日元 (JPY)</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="model-input model-unit" data-row="${rowId}">
+                        <option value="million" ${unit === 'million' ? 'selected' : ''}>百万 tokens</option>
+                        <option value="thousand" ${unit === 'thousand' ? 'selected' : ''}>千 tokens</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="model-input input-price" value="${inputPrice}"
+                           min="0" step="0.01" data-row="${rowId}">
+                </td>
+                <td>
+                    <input type="number" class="model-input output-price" value="${outputPrice}"
+                           min="0" step="0.01" data-row="${rowId}">
+                </td>
+                <td class="total-price-cell">
+                    <span class="total-price">0.00</span>
+                </td>
+                <td>
+                    <button class="delete-btn" onclick="deleteModel('${rowId}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+
+            // 为新行添加事件监听器
+            const inputs = row.querySelectorAll('.model-input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateCalculations);
+                input.addEventListener('change', updateCalculations);
+            });
+
+            updateCalculations();
+            return rowId;
+        }
+
+        // 删除模型行
+        function deleteModel(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                updateAllCalculations();
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 添加模型按钮
+            document.getElementById('addModelBtn').addEventListener('click', function() {
+                addModelRow();
+            });
+
+            // 控制选项变化
+            document.getElementById('inputTokens').addEventListener('input', updateAllCalculations);
+            document.getElementById('outputTokens').addEventListener('input', updateAllCalculations);
+        }
+
+        // 更新单个模型的计算
+        function updateCalculations(event) {
+            if (event) {
+                const rowId = event.target.getAttribute('data-row');
+                updateRowCalculation(rowId);
+            }
+            updateResultsDisplay();
+        }
+
+        // 更新所有计算
+        function updateAllCalculations() {
+            const rows = document.querySelectorAll('#modelsTableBody tr');
+            rows.forEach(row => {
+                const rowId = row.id;
+                if (rowId) {
+                    updateRowCalculation(rowId);
+                }
+            });
+            updateResultsDisplay();
+        }
+
+        // 更新单行计算
+        function updateRowCalculation(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+
+            const nameInput = row.querySelector('.model-name');
+            const currencySelect = row.querySelector('.model-currency');
+            const unitSelect = row.querySelector('.model-unit');
+            const inputPriceInput = row.querySelector('.input-price');
+            const outputPriceInput = row.querySelector('.output-price');
+            const totalPriceSpan = row.querySelector('.total-price');
+
+            const inputPrice = parseFloat(inputPriceInput.value) || 0;
+            const outputPrice = parseFloat(outputPriceInput.value) || 0;
+            const inputTokens = parseFloat(document.getElementById('inputTokens').value) || 0;
+            const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+            const currency = currencySelect.value;
+            const unit = unitSelect.value;
+
+            // 计算原始总价格（使用模型自己的币种和单位）
+            const originalTotalPrice = (inputPrice * inputTokens + outputPrice * outputTokens);
+
+            // 转换为人民币每百万tokens的总价格
+            const inputPriceCNY = convertToCNYPerMillion(inputPrice, currency, unit);
+            const outputPriceCNY = convertToCNYPerMillion(outputPrice, currency, unit);
+            const totalPriceCNY = (inputPriceCNY * inputTokens + outputPriceCNY * outputTokens);
+
+            // 更新显示：显示原始价格和统一后的价格
+            const symbol = currencySymbols[currency] || '$';
+            totalPriceSpan.textContent = `${symbol}${originalTotalPrice.toFixed(2)} (¥${totalPriceCNY.toFixed(2)})`;
+
+            // 存储统一后的价格用于排序
+            row.dataset.unifiedPrice = totalPriceCNY;
+        }
+
+        // 更新结果显示
+        function updateResultsDisplay() {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const rows = document.querySelectorAll('#modelsTableBody tr');
+
+            // 收集所有模型数据
+            const models = [];
+            rows.forEach(row => {
+                const nameInput = row.querySelector('.model-name');
+                const currencySelect = row.querySelector('.model-currency');
+                const unitSelect = row.querySelector('.model-unit');
+                const inputPriceInput = row.querySelector('.input-price');
+                const outputPriceInput = row.querySelector('.output-price');
+                const totalPriceSpan = row.querySelector('.total-price');
+
+                const name = nameInput.value.trim() || '未命名模型';
+                const currency = currencySelect.value;
+                const unit = unitSelect.value;
+                const inputPrice = parseFloat(inputPriceInput.value) || 0;
+                const outputPrice = parseFloat(outputPriceInput.value) || 0;
+                const totalPriceText = totalPriceSpan.textContent;
+
+                // 获取统一后的价格（人民币每百万tokens）
+                const unifiedPrice = parseFloat(row.dataset.unifiedPrice) || 0;
+
+                models.push({
+                    name,
+                    currency,
+                    unit,
+                    inputPrice,
+                    outputPrice,
+                    unifiedPrice,  // 统一后的价格（人民币每百万tokens）
+                    totalPriceText
+                });
+            });
+
+            // 按统一后的价格排序（人民币每百万tokens）
+            models.sort((a, b) => a.unifiedPrice - b.unifiedPrice);
+
+            // 生成结果卡片
+            resultsGrid.innerHTML = '';
+
+            if (models.length === 0) {
+                resultsGrid.innerHTML = `
+                    <div class="result-card" style="grid-column: 1 / -1; text-align: center;">
+                        <h3><i class="fas fa-info-circle"></i> 暂无数据</h3>
+                        <p>请添加至少一个模型进行价格比较</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const inputTokens = parseFloat(document.getElementById('inputTokens').value) || 0;
+            const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+
+            models.forEach((model, index) => {
+                const rankClass = `rank-${index + 1}`;
+                const rankText = index === 0 ? '最便宜' :
+                                index === 1 ? '第二便宜' :
+                                index === 2 ? '第三便宜' : `第${index + 1}名`;
+
+                const symbol = currencySymbols[model.currency] || '$';
+                const unitLabel = unitLabels[model.unit];
+
+                // 计算转换后的单价（人民币每百万tokens）
+                const inputPriceCNY = convertToCNYPerMillion(model.inputPrice, model.currency, model.unit);
+                const outputPriceCNY = convertToCNYPerMillion(model.outputPrice, model.currency, model.unit);
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <h3>
+                        ${model.name}
+                        <span class="rank-badge ${rankClass}">${rankText}</span>
+                    </h3>
+                    <div class="price-display">¥${model.unifiedPrice.toFixed(2)}</div>
+                    <div class="price-unit">统一总价格 (人民币/百万tokens)</div>
+
+                    <div class="model-details">
+                        <div>
+                            <span>原始价格:</span>
+                            <span>${model.totalPriceText}</span>
+                        </div>
+                        <div>
+                            <span>原始币种:</span>
+                            <span>${model.currency}</span>
+                        </div>
+                        <div>
+                            <span>原始单位:</span>
+                            <span>${unitLabel}</span>
+                        </div>
+                        <div>
+                            <span>输入单价:</span>
+                            <span>${symbol}${model.inputPrice.toFixed(2)} / ${unitLabel}</span>
+                        </div>
+                        <div>
+                            <span>输出单价:</span>
+                            <span>${symbol}${model.outputPrice.toFixed(2)} / ${unitLabel}</span>
+                        </div>
+                        <div>
+                            <span>转换后输入单价:</span>
+                            <span>¥${inputPriceCNY.toFixed(2)} / 百万tokens</span>
+                        </div>
+                        <div>
+                            <span>转换后输出单价:</span>
+                            <span>¥${outputPriceCNY.toFixed(2)} / 百万tokens</span>
+                        </div>
+                    </div>
+                `;
+
+                resultsGrid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
